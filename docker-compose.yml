@@ -1,0 +1,17 @@
+version: "3.4"
+
+services:
+
+  valentina:
+    build:
+      dockerfile: ./docker/valentina.dockerfile
+      context: ./
+    environment:
+      DISPLAY: host.docker.internal:0
+    ports:
+      # Mapping the port to make the Gemini server accessible outside of the container
+      - "1965:1965"
+    volumes:
+      - type: bind
+        source: ./erlang
+        target: /valentina

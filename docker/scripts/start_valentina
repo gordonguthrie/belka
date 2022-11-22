@@ -1,0 +1,2 @@
+#!/bin/bash
+docker exec -it valentina-valentina-1 /bin/bash
