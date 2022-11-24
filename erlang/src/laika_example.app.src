@@ -1,0 +1,15 @@
+{application, laika_example,
+ [{description, "An OTP application implementing the Gemini protocol"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {laika_example, []}},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {licenses, ["GNU GPL V3"]},
+  {links, []}
+ ]}.

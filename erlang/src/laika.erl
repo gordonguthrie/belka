@@ -1,16 +1,21 @@
 %%%-------------------------------------------------------------------
-%% @doc valentina public API
+%% @doc Laika Gemini Server
+%%
+%% Liaka is a Gemini Server - https://gemini.circumlunar.space/
+%%
+%% Named after Laikia - the first dog in space
+%%
+%% To use
+%%
 %% @end
 %%%-------------------------------------------------------------------
 
--module(valentina_app).
+-module(laika).
 
--behaviour(application).
+-export([start/4, handle_response/2, loop/2]).
 
--export([start/2, stop/1, handle_response/1]).
+start(Port, CertFile, KeyFile, HandlerFn) ->
 
-start(_StartType, _StartArgs) ->
-    ok = ssl:start(),
     F = fun(_, {bad_cert, selfsigned_peer}, UserState) ->
                    {valid, UserState}; %% Allow self-signed certificates
                  (_,{bad_cert, _} = Reason, _) ->
@@ -22,41 +27,35 @@ start(_StartType, _StartArgs) ->
                  (_, valid_peer, UserState) ->
                    {valid, UserState}
                end,
-    Certs = [{certs_keys, [#{certfile => "/valentina/priv/keys/server.crt",
-                             keyfile => "/valentina/priv/keys/server.key"}]}],
+
+    Certs = [{certs_keys, [#{certfile => CertFile,
+                             keyfile  => KeyFile}]}],
     A = [{active, true}],
     L = [{log_level, info}],
     V = [{verify, verify_peer}, {fail_if_no_peer_cert, false}, {verify_fun, {F, []}}],
-    {ok, ListenSSLSocket} = ssl:listen(1965, Certs ++ A ++ L ++ V),
-    loop(ListenSSLSocket),
-    valentina_sup:start_link().
-
-stop(_State) ->
-    ok.
+    {ok, ListenSSLSocket} = ssl:listen(Port, Certs ++ A ++ L ++ V),
+    _Pid = spawn_link(laika, loop, [ListenSSLSocket, HandlerFn]).
 
 %% internal functions
-loop(ListenSSLSocket) ->
+loop(ListenSSLSocket, HandlerFn) ->
     {ok, TLSTransportSocket} = ssl:transport_accept(ListenSSLSocket),
-    spawn(valentina_app, handle_response, [TLSTransportSocket]),
-    loop(ListenSSLSocket).
+    spawn(laika, handle_response, [TLSTransportSocket, HandlerFn]),
+    loop(ListenSSLSocket, HandlerFn).
 
-handle_response(TLSTransportSocket) ->
+handle_response(TLSTransportSocket, {M, F}) ->
     ok = ssl:controlling_process(TLSTransportSocket, self()),
-    Resp = ssl:handshake(TLSTransportSocket, 5000),
-    {ok, Socket} = Resp,
+    {ok, Socket} = ssl:handshake(TLSTransportSocket, 5000),
     Id = case ssl:peercert(Socket) of
         {error, no_peercert} ->
             no_identity;
         {ok, Cert} ->
-            C = extract_details(Cert),
-            {identity, C}
+            extract_details(Cert)
         end,
-    io:format("~p~n", [Socket]),
     receive
         Msg ->
             {ssl, _, Gemini} = Msg,
+            io:format("Gemini is ~p~n", [Gemini]),
             URI = parse_gemini(Gemini),
-            io:format("URI is ~p~n", [URI]),
             #{scheme := Scheme} = URI,
             case Scheme of
                 "gemini" ->
@@ -68,11 +67,10 @@ handle_response(TLSTransportSocket) ->
                               querykvs => QueryKVs,
                               frags    => Frags},
                     io:format("Route is ~p~n", [Route]),
-                    ok = ssl:send(Socket, <<"20 text/gemini\r\n">>),
-                    ok = ssl:send(Socket, <<"gingo bongo\r\n">>),
-                    ok = ssl:close(Socket);
+                    Responses = M:F(Route),
+				    [ok = ssl:send(Socket, X) || X <- Responses],
+				    ok = ssl:close(Socket);
                 Other ->
-                    io:format("in invalid scheme"),
                     exit({invalid_scheme, Other})
             end
         end,
@@ -81,7 +79,7 @@ handle_response(TLSTransportSocket) ->
 get_path(#{path := P}) -> string:tokens(P, "/").
 
 get_query_KVs(#{'query' := Q}) -> uri_string:dissect_query(Q);
-get_query_KVs(_)            -> [].
+get_query_KVs(_)               -> [].
 
 get_frag(#{fragment := F}) -> F;
 get_frag(_)                -> "".
@@ -110,3 +108,4 @@ convert_key({2,5,4,6})  -> country;
 convert_key({2,5,4,8})  -> location;
 convert_key({2,5,4,10}) -> organisation;
 convert_key(_)          -> unknown.
+

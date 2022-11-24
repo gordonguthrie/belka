@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc valentina top level supervisor.
+%% @doc laiki example top level supervisor.
 %% @end
 %%%-------------------------------------------------------------------
 
--module(valentina_sup).
+-module(laika_example_sup).
 
 -behaviour(supervisor).
 
