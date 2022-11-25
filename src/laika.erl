@@ -130,7 +130,6 @@ handle_incoming(TLSTransportSocket, {M, F}) ->
                               path     => Path,
                               querykvs => QueryKVs,
                               frags    => Frags},
-                    io:format("Route is ~p~n", [Route]),
                     Responses = M:F(Route),
 				    [ok = ssl:send(Socket, X) || X <- Responses],
 				    ok = ssl:close(Socket);
