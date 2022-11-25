@@ -5,14 +5,76 @@
 %%
 %% Named after Laikia - the first dog in space
 %%
-%% To use
+%% This is the sequence diagram for the server
+%%
+%% +---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
+%% | YourApp |                      | LaikaServer |          | ListeningLoop |                 | HandleIncoming  |                    | GeminiClient  |
+%% +---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
+%%      |                                  |                         |                                  |                                     |
+%%      | define handler fn                |                         |                                  |                                     |
+%%      |------------------                |                         |                                  |                                     |
+%%      |                 |                |                         |                                  |                                     |
+%%      |<-----------------                |                         |                                  |                                     |
+%%      |                                  |                         |                                  |                                     |
+%%      | start Laika w/ handler fn        |                         |                                  |                                     |
+%%      |--------------------------------->|                         |                                  |                                     |
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  | spawn process           |                                  |                                     |
+%%      |                                  |------------------------>|                                  |                                     |
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         | bind to TLS Socket               |                                     |
+%%      |                                  |                         |-------------------               |                                     |
+%%      |                                  |                         |                  |               |                                     |
+%%      |                                  |                         |<------------------               |                                     |
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         |                                  |                          start conn |
+%%      |                                  |                         |<-----------------------------------------------------------------------|
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         | spawn process with conn          |                                     |
+%%      |                                  |                         |--------------------------------->|                                     |
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         | go back to listening             |                                     |
+%%      |                                  |                         |---------------------             |                                     |
+%%      |                                  |                         |                    |             |                                     |
+%%      |                                  |                         |<--------------------             |                                     |
+%%      |                                  |-----------------------\ |                                  |                                     |
+%%      |                                  || (ready for new conn) |-|                                  |                                     |
+%%      |                                  ||----------------------| |                                  |                                     |
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         |                                  | take control of conn                |
+%%      |                                  |                         |                                  |---------------------                |
+%%      |                                  |                         |                                  |                    |                |
+%%      |                                  |                         |                                  |<--------------------                |
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         |                                  | signal ready                        |
+%%      |                                  |                         |                                  |------------------------------------>|
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         |                                  |                         get command |
+%%      |                                  |                         |                                  |<------------------------------------|
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         |                                  | call handler fn                     |
+%%      |                                  |                         |                                  |----------------                     |
+%%      |                                  |                         |                                  |               |                     |
+%%      |                                  |                         |                                  |<---------------                     |
+%%      |                                  |                         |                                  |                                     |
+%%      |                                  |                         |                                  | return output of handler fn         |
+%%      |                                  |                         |                                  |------------------------------------>|
+%%      |                                  |                         |                                  |                                     |
 %%
 %% @end
 %%%-------------------------------------------------------------------
 
 -module(laika).
 
--export([start/4, handle_response/2, loop/2]).
+%% This is the API used to start the Gemini Server
+-export([start/4]).
+
+%% These exports are reserved for use inside the Gemini Server
+-export([
+    listening_loop/2,
+    handle_incoming/2
+    ]).
+
 
 start(Port, CertFile, KeyFile, HandlerFn) ->
 
@@ -34,15 +96,18 @@ start(Port, CertFile, KeyFile, HandlerFn) ->
     L = [{log_level, info}],
     V = [{verify, verify_peer}, {fail_if_no_peer_cert, false}, {verify_fun, {F, []}}],
     {ok, ListenSSLSocket} = ssl:listen(Port, Certs ++ A ++ L ++ V),
-    _Pid = spawn_link(laika, loop, [ListenSSLSocket, HandlerFn]).
+    _Pid = spawn_link(laika, listening_loop, [ListenSSLSocket, HandlerFn]).
 
 %% internal functions
-loop(ListenSSLSocket, HandlerFn) ->
-    {ok, TLSTransportSocket} = ssl:transport_accept(ListenSSLSocket),
-    spawn(laika, handle_response, [TLSTransportSocket, HandlerFn]),
-    loop(ListenSSLSocket, HandlerFn).
 
-handle_response(TLSTransportSocket, {M, F}) ->
+%% The listening loop
+listening_loop(ListenSSLSocket, HandlerFn) ->
+    {ok, TLSTransportSocket} = ssl:transport_accept(ListenSSLSocket),
+    _PID = spawn(laika, handle_incoming, [TLSTransportSocket, HandlerFn]),
+    listening_loop(ListenSSLSocket, HandlerFn).
+
+%% The functions that handles incoming connections
+handle_incoming(TLSTransportSocket, {M, F}) ->
     ok = ssl:controlling_process(TLSTransportSocket, self()),
     {ok, Socket} = ssl:handshake(TLSTransportSocket, 5000),
     Id = case ssl:peercert(Socket) of
@@ -54,7 +119,6 @@ handle_response(TLSTransportSocket, {M, F}) ->
     receive
         Msg ->
             {ssl, _, Gemini} = Msg,
-            io:format("Gemini is ~p~n", [Gemini]),
             URI = parse_gemini(Gemini),
             #{scheme := Scheme} = URI,
             case Scheme of

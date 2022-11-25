@@ -1,8 +1,8 @@
-{application, laika_example,
- [{description, "An OTP application implementing the Gemini protocol"},
+{application, laika,
+ [{description, "An OTP library implementing the Gemini protocol"},
   {vsn, "0.1.0"},
   {registered, []},
-  {mod, {laika_example, []}},
+  {mod, []},
   {applications,
    [kernel,
     stdlib
