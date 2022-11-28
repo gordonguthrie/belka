@@ -1,7 +1,7 @@
-# Laika 🚀🐕
+# Belka 2️⃣🐕🚀
 
-A [Gemini Server](https://gemini.circumlunar.space/) in Erlang named after Laika - the first dog in space
+A [Gemini Server](https://gemini.circumlunar.space/) in Erlang named after Belka - the second dog in space
 
 # Installation Guide
 
-To use Laiki please see [Liaka Example](https://github.com/gordonguthrie/laika-example)
+To use Belka please see [Belka Example](https://github.com/gordonguthrie/belka-example)

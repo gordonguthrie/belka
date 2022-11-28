@@ -1,14 +1,14 @@
 %%%-------------------------------------------------------------------
-%% @doc Laika Gemini Server
+%% @doc Belka Gemini Server
 %%
-%% Liaka is a Gemini Server - https://gemini.circumlunar.space/
+%% Belka is a Gemini Server - https://gemini.circumlunar.space/
 %%
-%% Named after Laikia - the first dog in space
+%% Named after Belka - the second dog in space
 %%
 %% This is the sequence diagram for the server
 %%
 %% +---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
-%% | YourApp |                      | LaikaServer |          | ListeningLoop |                 | HandleIncoming  |                    | GeminiClient  |
+%% | YourApp |                      | Belkaserver |          | ListeningLoop |                 | HandleIncoming  |                    | GeminiClient  |
 %% +---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
 %%      |                                  |                         |                                  |                                     |
 %%      | define handler fn                |                         |                                  |                                     |
@@ -16,7 +16,7 @@
 %%      |                 |                |                         |                                  |                                     |
 %%      |<-----------------                |                         |                                  |                                     |
 %%      |                                  |                         |                                  |                                     |
-%%      | start Laika w/ handler fn        |                         |                                  |                                     |
+%%      | start Belka w/ handler fn        |                         |                                  |                                     |
 %%      |--------------------------------->|                         |                                  |                                     |
 %%      |                                  |                         |                                  |                                     |
 %%      |                                  | spawn process           |                                  |                                     |
@@ -64,7 +64,7 @@
 %% @end
 %%%-------------------------------------------------------------------
 
--module(laika).
+-module(belka).
 
 %% This is the API used to start the Gemini Server
 -export([start/4]).
@@ -96,14 +96,14 @@ start(Port, CertFile, KeyFile, HandlerFn) ->
     L = [{log_level, info}],
     V = [{verify, verify_peer}, {fail_if_no_peer_cert, false}, {verify_fun, {F, []}}],
     {ok, ListenSSLSocket} = ssl:listen(Port, Certs ++ A ++ L ++ V),
-    _Pid = spawn_link(laika, listening_loop, [ListenSSLSocket, HandlerFn]).
+    _Pid = spawn_link(belka, listening_loop, [ListenSSLSocket, HandlerFn]).
 
 %% internal functions
 
 %% The listening loop
 listening_loop(ListenSSLSocket, HandlerFn) ->
     {ok, TLSTransportSocket} = ssl:transport_accept(ListenSSLSocket),
-    _PID = spawn(laika, handle_incoming, [TLSTransportSocket, HandlerFn]),
+    _PID = spawn(belka, handle_incoming, [TLSTransportSocket, HandlerFn]),
     listening_loop(ListenSSLSocket, HandlerFn).
 
 %% The functions that handles incoming connections
