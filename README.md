@@ -12,7 +12,7 @@ The Belka server family is designed to be as smol as possible, so features are o
 
 To that mind various services are provided as additional components:
 
-* [Belka Router)(https://github.com/gordonguthrie/belka-router) - a URL router
+* [Belka Router](https://github.com/gordonguthrie/belka-router) - a URL router
 * [Belka Templates](https://github.com/gordonguthrie/belka-templates) - simple text-based templating system
 
 # A Worked Example
