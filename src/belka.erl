@@ -1,7 +1,6 @@
-%%%-------------------------------------------------------------------
-%% @doc Belka Gemini Server
+%% # Belka Gemini Server
 %%
-%% Belka is a Gemini Server - https://gemini.circumlunar.space/
+%% ## Belka is a Gemini Server - https://gemini.circumlunar.space/
 %%
 %% Named after Belka - the second dog in space
 %%
@@ -61,8 +60,6 @@
 %%           |                                  |                         |                                  |------------------------------------>|
 %%           |                                  |                         |                                  |                                     |
 %%
-%% @end
-%%%-------------------------------------------------------------------
 
 -module(belka).
 
