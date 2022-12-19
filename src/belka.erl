@@ -66,6 +66,8 @@
 
 -module(belka).
 
+%% ## Public API
+
 %% This is the API used to start the Gemini Server
 -export([start/4]).
 
@@ -74,7 +76,6 @@
     listening_loop/2,
     handle_incoming/2
     ]).
-
 
 start(Port, CertFile, KeyFile, HandlerFn) ->
 
@@ -98,7 +99,7 @@ start(Port, CertFile, KeyFile, HandlerFn) ->
     {ok, ListenSSLSocket} = ssl:listen(Port, Certs ++ A ++ L ++ V),
     _Pid = spawn_link(belka, listening_loop, [ListenSSLSocket, HandlerFn]).
 
-%% internal functions
+%% ## Private Functions
 
 %% The listening loop
 listening_loop(ListenSSLSocket, HandlerFn) ->
