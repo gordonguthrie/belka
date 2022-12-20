@@ -1,4 +1,3 @@
-```erlang
 # The Belka Family
 
 Belka is a family of components that you can use to buld [Gemini](https://gemini.circumlunar.space/) servers.
@@ -27,4 +26,3 @@ To that mind various services are provided as additional components:
 * [Belka Templates](https://github.com/gordonguthrie/belka-templates) - simple text-based templating system
 
 
-```
