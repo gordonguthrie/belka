@@ -1,8 +1,10 @@
-%% # Belka Gemini Server
+%% # Belka Gemini Server 2️⃣🐕🚀
 %%
-%% ## Belka is a Gemini Server - https://gemini.circumlunar.space/
+%% ## Belka is a Gemini Server
 %%
-%% Named after Belka - the second dog in space
+%% [Read more about Gemini](https://gemini.circumlunar.space/)
+%%
+%% This server is named after Belka - the second dog in space
 %%
 %% This is the sequence diagram for the server
 %%
