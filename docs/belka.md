@@ -84,6 +84,49 @@ These exports are reserved for use inside the Gemini Server
     handle_incoming/2
     ]).
 
+```
+
+This is the function that your application will actually call.
+There are 4 arguments:
+
+* what port to start listening on (normally 1965 and some Gemini clients will fail if you try to use another one)
+* a certificate file
+* a keyfile
+* a handler function
+^
+
+Every computer on the internet has its own IP (Internet Protocol Address) - which looks like 123.456.789.012
+and on that IP address it can listen on 65536 (2 to the power 16) ports:
+
+* the web is normally 80 (unsecured `http://`) and 43 (secured 'https://')
+* email is on port 25 (`smtp://`)
+* ssh is on port 22
+^
+
+`gemini://` is 1965
+
+The two cryptographic parameters identify your server and service
+please see [belka-example](https://github.com/gordonguthrie/belka-example)
+for a deeper explanaction
+
+The last parameter is a handler function. This server is dumb.
+It listens for someone trying to speak `gemini://` to it.
+Then the servrer says hello and does a crypto graphic handshake and makes sure
+the machine-to-machine comms are set up safely
+and then it says "I'm done" and calls the handler function
+
+The handler function's job is to do stuff - provide the service
+be the 'thing' that you are writing.
+
+The start function prepares a socket to listen on the port:
+
+* it creates a function to verify the Secure Socket Layer connection
+* it then starts listening on the port
+* and finally it spawns another process and passes the listener it has just created (and the handler function) over
+^
+
+```erlang
+
 start(Port, CertFile, KeyFile, HandlerFn) ->
 
     F = fun(_, {bad_cert, selfsigned_peer}, UserState) ->
@@ -110,9 +153,20 @@ start(Port, CertFile, KeyFile, HandlerFn) ->
 
 ## Private Functions
 
-The listening loop
+## The listening loop
+
+The listening loop is a very simple function
+
+* it listens for somebody out there on the internet trying to connect
+* when they do it executes a `transport accept` which means it is ready to talk
+* then instead of actually talking it spawns another process and gives the connection to it
+^
+
+It is a receptionist function, it answers the phone, puts you through and goes
+back to waiting for the phone to ring
 
 ```erlang
+
 listening_loop(ListenSSLSocket, HandlerFn) ->
     {ok, TLSTransportSocket} = ssl:transport_accept(ListenSSLSocket),
     _PID = spawn(belka, handle_incoming, [TLSTransportSocket, HandlerFn]),
@@ -120,10 +174,31 @@ listening_loop(ListenSSLSocket, HandlerFn) ->
 
 ```
 
-The functions that handles incoming connections
+## Handling Incoming requrests
+
+this is the meat of the `gemini://` server
+
+It takes the transport socket accept and first extracts the ID
+of the client - a key and a name
+
+Then it checks if the system talking to it wants to talk `gemini://`
+
+If the client wants to talk `gemini://` this function breaks up the request
+tidy's it up and then
+
+* calls the handler function
+* waits to get a response back
+* sends that response back to the client
+* closes the socket and dies
+^
+
+If the remote server doesn't want to talk `gemini://`
+(say the remote user has pointed their web browser to port 1965
+and is looking for something that speaks `http://`) this process just kills itself
 
 ```erlang
-handle_incoming(TLSTransportSocket, {M, F}) ->
+
+handle_incoming(TLSTransportSocket, {Module, Function}) ->
     ok = ssl:controlling_process(TLSTransportSocket, self()),
     {ok, Socket} = ssl:handshake(TLSTransportSocket, 5000),
     Id = case ssl:peercert(Socket) of
@@ -146,7 +221,7 @@ handle_incoming(TLSTransportSocket, {M, F}) ->
                               path     => Path,
                               querykvs => QueryKVs,
                               frags    => Frags},
-                    Responses = M:F(Route),
+                    Responses = Module:Function(Route),
 				    [ok = ssl:send(Socket, X) || X <- Responses],
 				    ok = ssl:close(Socket);
                 Other ->
@@ -154,6 +229,17 @@ handle_incoming(TLSTransportSocket, {M, F}) ->
             end
         end,
     ok.
+
+```
+
+## Bits and pieces
+
+### Tidying up the request
+
+These functions are all called on the request that the user has sent it.
+They break up that request and make it easy to process
+
+```erlang
 
 get_path(#{path := P}) -> string:tokens(P, "/").
 
@@ -165,6 +251,21 @@ get_frag(_)                -> "".
 
 parse_gemini(Path) ->
     _URI = uri_string:percent_decode(uri_string:parse(string:trim(Path))).
+
+```
+
+### Getting bits out of the cryptographic certificates
+
+The application server is only really interested in two things:
+
+* what the person has called themselves (their name)
+* what public key are they identifiable by
+^
+
+these functions just rummage around in the data that is sent setting up a secure
+communication and extract those bits.
+
+```erlang
 
 extract_details(Cert) ->
     {_, Data, _, _} = public_key:pkix_decode_cert(Cert, otp),

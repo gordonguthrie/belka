@@ -1,0 +1,27 @@
+# The Belka Family
+
+Belka is a family of components that you can use to buld [Gemini](https://gemini.circumlunar.space/) servers.
+
+`gemini://` is a comms protocol a bit more sophisticated, modern, secure and privacy aware than `gopher://` and a lot less sophisticated and surveilable than `http://`.
+
+This makes it ideal to build services that are smol, fun, lightweight.
+
+It also makes it an ideal teaching protocol. If you are teaching very new developers then can architect and build their own lightweight apps using `gemini://` whilst reading and understanding the entire codebase.
+
+Belka is designed to support a pedagogic approach based on simplicity, profound understanding and quick results.
+
+[Belka Server Sourcecode](./belka.html)
+
+# Building Your Own Service
+
+To use Belka please see [Belka Example](https://github.com/gordonguthrie/belka-example)
+
+# Design Principles
+
+The Belka server family is designed to be as smol as possible, so features are only to be dragged in as needed.
+
+To that mind various services are provided as additional components:
+
+* [Belka Router](https://github.com/gordonguthrie/belka-router) - a URL router
+* [Belka Templates](https://github.com/gordonguthrie/belka-templates) - simple text-based templating system
+
