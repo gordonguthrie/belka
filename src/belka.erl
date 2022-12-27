@@ -196,11 +196,11 @@ handle_incoming(TLSTransportSocket, {Module, Function}) ->
                 "gemini" ->
                     Path = get_path(URI),
                     QueryKVs = get_query_KVs(URI),
-                    Frags = get_frag(URI),
+                    Frag = get_frag(URI),
                     Route = #{id       => Id,
                               path     => Path,
                               querykvs => QueryKVs,
-                              frags    => Frags},
+                              frag     => Frag},
                     Responses = Module:Function(Route),
 				    [ok = ssl:send(Socket, X) || X <- Responses],
 				    ok = ssl:close(Socket);
