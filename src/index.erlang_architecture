@@ -25,3 +25,13 @@
 % * [Belka Router](https://github.com/gordonguthrie/belka-router) - a URL router
 % * [Belka Templates](https://github.com/gordonguthrie/belka-templates) - simple text-based templating system
 
+%jekyll <div>
+%jekyll {% for item in site.data.contents.toc %}
+%jekyll     <h3>{{ item.title }}</h3>
+%jekyll       <ul>
+%jekyll         {% for entry in item.subfolderitems %}
+%jekyll           <li><a href="{{ entry.url }}">{{ entry.page }}</a></li>
+%jekyll         {% endfor %}
+%jekyll       </ul>
+%jekyll   {% endfor %}
+%jekyll </div>

@@ -25,4 +25,13 @@ To that mind various services are provided as additional components:
 * [Belka Router](https://github.com/gordonguthrie/belka-router) - a URL router
 * [Belka Templates](https://github.com/gordonguthrie/belka-templates) - simple text-based templating system
 
-
+ <div>
+ {% for item in site.data.contents.toc %}
+     <h3>{{ item.title }}</h3>
+       <ul>
+         {% for entry in item.subfolderitems %}
+           <li><a href="{{ entry.url }}">{{ entry.page }}</a></li>
+         {% endfor %}
+       </ul>
+   {% endfor %}
+ </div>
