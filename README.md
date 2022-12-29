@@ -2,6 +2,11 @@
 
 A [Gemini Server](https://gemini.circumlunar.space/) in Erlang named after Belka - the second dog in space
 
+# Architecture Documents
+
+The [architectural documentation](https://gordonguthrie.github.io/belka) for this example is built with [Literate Code Reader](https://gordonguthrie.github.io/literatecodereader)
+
+
 # Installation Guide
 
 To use Belka please see [Belka Example](https://github.com/gordonguthrie/belka-example)
