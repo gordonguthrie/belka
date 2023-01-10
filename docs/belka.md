@@ -1,67 +1,70 @@
-# Belka Gemini Server 2️⃣🐕🚀
+-------------------------------------------------------------------
 
-## Belka is a Gemini Server
+## Belka Gemini Server
 
-[Read more about Gemini](https://gemini.circumlunar.space/)
+Belka is a [Gemini Server](https://gemini.circumlunar.space/)
 
-This server is named after Belka - the second dog in space
+Named after Belka - the second dog in space
 
 This is the sequence diagram for the server
 
-     +---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
-     | YourApp |                      | Belkaserver |          | ListeningLoop |                 | HandleIncoming  |                    | GeminiClient  |
-     +---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
-          |                                  |                         |                                  |                                     |
-          | define handler fn                |                         |                                  |                                     |
-          |------------------                |                         |                                  |                                     |
-          |                 |                |                         |                                  |                                     |
-          |<-----------------                |                         |                                  |                                     |
-          |                                  |                         |                                  |                                     |
-          | start Belka w/ handler fn        |                         |                                  |                                     |
-          |--------------------------------->|                         |                                  |                                     |
-          |                                  |                         |                                  |                                     |
-          |                                  | spawn process           |                                  |                                     |
-          |                                  |------------------------>|                                  |                                     |
-          |                                  |                         |                                  |                                     |
-          |                                  |                         | bind to TLS Socket               |                                     |
-          |                                  |                         |-------------------               |                                     |
-          |                                  |                         |                  |               |                                     |
-          |                                  |                         |<------------------               |                                     |
-          |                                  |                         |                                  |                                     |
-          |                                  |                         |                                  |                          start conn |
-          |                                  |                         |<-----------------------------------------------------------------------|
-          |                                  |                         |                                  |                                     |
-          |                                  |                         | spawn process with conn          |                                     |
-          |                                  |                         |--------------------------------->|                                     |
-          |                                  |                         |                                  |                                     |
-          |                                  |                         | go back to listening             |                                     |
-          |                                  |                         |---------------------             |                                     |
-          |                                  |                         |                    |             |                                     |
-          |                                  |                         |<--------------------             |                                     |
-          |                                  |-----------------------\ |                                  |                                     |
-          |                                  || (ready for new conn) |-|                                  |                                     |
-          |                                  ||----------------------| |                                  |                                     |
-          |                                  |                         |                                  |                                     |
-          |                                  |                         |                                  | take control of conn                |
-          |                                  |                         |                                  |---------------------                |
-          |                                  |                         |                                  |                    |                |
-          |                                  |                         |                                  |<--------------------                |
-          |                                  |                         |                                  |                                     |
-          |                                  |                         |                                  | signal ready                        |
-          |                                  |                         |                                  |------------------------------------>|
-          |                                  |                         |                                  |                                     |
-          |                                  |                         |                                  |                         get command |
-          |                                  |                         |                                  |<------------------------------------|
-          |                                  |                         |                                  |                                     |
-          |                                  |                         |                                  | call handler fn                     |
-          |                                  |                         |                                  |----------------                     |
-          |                                  |                         |                                  |               |                     |
-          |                                  |                         |                                  |<---------------                     |
-          |                                  |                         |                                  |                                     |
-          |                                  |                         |                                  | return output of handler fn         |
-          |                                  |                         |                                  |------------------------------------>|
-          |                                  |                         |                                  |                                     |
++---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
+| YourApp |                      | Belkaserver |          | ListeningLoop |                 | HandleIncoming  |                    | GeminiClient  |
++---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
+     |                                  |                         |                                  |                                     |
+     | define handler fn                |                         |                                  |                                     |
+     |------------------                |                         |                                  |                                     |
+     |                 |                |                         |                                  |                                     |
+     |<-----------------                |                         |                                  |                                     |
+     |                                  |                         |                                  |                                     |
+     | start Belka w/ handler fn        |                         |                                  |                                     |
+     |--------------------------------->|                         |                                  |                                     |
+     |                                  |                         |                                  |                                     |
+     |                                  | spawn process           |                                  |                                     |
+     |                                  |------------------------>|                                  |                                     |
+     |                                  |                         |                                  |                                     |
+     |                                  |                         | bind to TLS Socket               |                                     |
+     |                                  |                         |-------------------               |                                     |
+     |                                  |                         |                  |               |                                     |
+     |                                  |                         |<------------------               |                                     |
+     |                                  |                         |                                  |                                     |
+     |                                  |                         |                                  |                          start conn |
+     |                                  |                         |<-----------------------------------------------------------------------|
+     |                                  |                         |                                  |                                     |
+     |                                  |                         | spawn process with conn          |                                     |
+     |                                  |                         |--------------------------------->|                                     |
+     |                                  |                         |                                  |                                     |
+     |                                  |                         | go back to listening             |                                     |
+     |                                  |                         |---------------------             |                                     |
+     |                                  |                         |                    |             |                                     |
+     |                                  |                         |<--------------------             |                                     |
+     |                                  |-----------------------\ |                                  |                                     |
+     |                                  || (ready for new conn) |-|                                  |                                     |
+     |                                  ||----------------------| |                                  |                                     |
+     |                                  |                         |                                  |                                     |
+     |                                  |                         |                                  | take control of conn                |
+     |                                  |                         |                                  |---------------------                |
+     |                                  |                         |                                  |                    |                |
+     |                                  |                         |                                  |<--------------------                |
+     |                                  |                         |                                  |                                     |
+     |                                  |                         |                                  | signal ready                        |
+     |                                  |                         |                                  |------------------------------------>|
+     |                                  |                         |                                  |                                     |
+     |                                  |                         |                                  |                         get command |
+     |                                  |                         |                                  |<------------------------------------|
+     |                                  |                         |                                  |                                     |
+     |                                  |                         |                                  | call handler fn                     |
+     |                                  |                         |                                  |----------------                     |
+     |                                  |                         |                                  |               |                     |
+     |                                  |                         |                                  |<---------------                     |
+     |                                  |                         |                                  |                                     |
+     |                                  |                         |                                  | return output of handler fn         |
+     |                                  |                         |                                  |------------------------------------>|
+     |                                  |                         |                                  |                                     |
 
+@end
+
+-------------------------------------------------------------------
 
 ```erlang
 
@@ -69,12 +72,10 @@ This is the sequence diagram for the server
 
 ```
 
-## Public API
-
 This is the API used to start the Gemini Server
 
 ```erlang
--export([start/4]).
+-export([start/3]).
 
 ```
 
@@ -86,52 +87,17 @@ These exports are reserved for use inside the Gemini Server
     handle_incoming/2
     ]).
 
+
+start(Port, Certs, HandlerFn) ->
+
 ```
 
-This is the function that your application will actually call.
-There are 4 arguments:
-
-* what port to start listening on (normally 1965 and some Gemini clients will fail if you try to use another one)
-* a certificate file
-* a keyfile
-* a handler function
-^
-
-Every computer on the internet has its own IP (Internet Protocol Address) - which looks like 123.456.789.012
-and on that IP address it can listen on 65536 (2 to the power 16) ports:
-
-* the web is normally 80 (unsecured `http://`) and 43 (secured 'https://')
-* email is on port 25 (`smtp://`)
-* ssh is on port 22
-^
-
-`gemini://` is 1965
-
-The two cryptographic parameters identify your server and service
-please see [belka-example](https://github.com/gordonguthrie/belka-example)
-for a deeper explanaction
-
-The last parameter is a handler function. This server is dumb.
-It listens for someone trying to speak `gemini://` to it.
-Then the servrer says hello and does a crypto graphic handshake and makes sure
-the machine-to-machine comms are set up safely
-and then it says "I'm done" and calls the handler function
-
-The handler function's job is to do stuff - provide the service
-be the 'thing' that you are writing.
-
-The start function prepares a socket to listen on the port:
-
-* it creates a function to verify the Secure Socket Layer connection
-* it then starts listening on the port
-* and finally it spawns another process and passes the listener it has just created (and the handler function) over
-^
+This function verifies the client certificate provide
+We override the default behavior as Gemini welcomes self-signed
+certificates
 
 ```erlang
-
-start(Port, CertFile, KeyFile, HandlerFn) ->
-
-    F = fun(_, {bad_cert, selfsigned_peer}, UserState) ->
+    Fun1 = fun(_, {bad_cert, selfsigned_peer}, UserState) ->
                    {valid, UserState}; %% Allow self-signed certificates
                  (_,{bad_cert, _} = Reason, _) ->
                    {fail, Reason};
@@ -143,32 +109,50 @@ start(Port, CertFile, KeyFile, HandlerFn) ->
                    {valid, UserState}
                end,
 
-    Certs = [{certs_keys, [#{certfile => CertFile,
-                             keyfile  => KeyFile}]}],
+```
+
+This function is to support multiple domains bound to the same IP
+for SSL multi-hosting
+We looking up the website the client is requesting and return their certificates
+
+```erlang
+    Fun2 = fun(Site) ->
+            {Site, Cs} = lists:keyfind(Site, 1, Certs),
+            [{certs_keys, [Cs]}]
+        end,
+
     A = [{active, true}],
     L = [{log_level, info}],
-    V = [{verify, verify_peer}, {fail_if_no_peer_cert, false}, {verify_fun, {F, []}}],
-    {ok, ListenSSLSocket} = ssl:listen(Port, Certs ++ A ++ L ++ V),
+    S = [{sni_fun, Fun2}],
+    V = [{verify, verify_peer}, {fail_if_no_peer_cert, false}, {verify_fun, {Fun1, []}}],
+
+```
+
+we start a socket listening for a connection on the gemini:// port 1965
+
+* if the client passes in a client certificate we will check it with our callback function
+* when the client tells us what URL they are accessing we will look up the certificate for that domain to establish a TLS connection for them
+^
+
+```erlang
+    {ok, ListenSSLSocket} = ssl:listen(Port, A ++ L ++ S ++V),
+
+```
+
+now we pass off the listening socket to its own process
+
+```erlang
     _Pid = spawn_link(belka, listening_loop, [ListenSSLSocket, HandlerFn]).
 
 ```
 
-## Private Functions
+internal functions
 
 ## The listening loop
-
-The listening loop is a very simple function
-
-* it listens for somebody out there on the internet trying to connect
-* when they do it executes a `transport accept` which means it is ready to talk
-* then instead of actually talking it spawns another process and gives the connection to it
-^
-
-It is a receptionist function, it answers the phone, puts you through and goes
-back to waiting for the phone to ring
+This is a very lightweight loop - when someone external contacts it is sets up a TLS connection and then passes it off immediately to another process to handle
+Each connection gets its own handling process, and spawning a process is cheap so this is safe up to 100,000s of connections
 
 ```erlang
-
 listening_loop(ListenSSLSocket, HandlerFn) ->
     {ok, TLSTransportSocket} = ssl:transport_accept(ListenSSLSocket),
     _PID = spawn(belka, handle_incoming, [TLSTransportSocket, HandlerFn]),
@@ -176,31 +160,11 @@ listening_loop(ListenSSLSocket, HandlerFn) ->
 
 ```
 
-## Handling Incoming requrests
-
-this is the meat of the `gemini://` server
-
-It takes the transport socket accept and first extracts the ID
-of the client - a key and a name
-
-Then it checks if the system talking to it wants to talk `gemini://`
-
-If the client wants to talk `gemini://` this function breaks up the request
-tidy's it up and then
-
-* calls the handler function
-* waits to get a response back
-* sends that response back to the client
-* closes the socket and dies
-^
-
-If the remote server doesn't want to talk `gemini://`
-(say the remote user has pointed their web browser to port 1965
-and is looking for something that speaks `http://`) this process just kills itself
+# The handling process
+This function handles incoming connections, each in their own process
 
 ```erlang
-
-handle_incoming(TLSTransportSocket, {Module, Function}) ->
+handle_incoming(TLSTransportSocket, {M, F}) ->
     ok = ssl:controlling_process(TLSTransportSocket, self()),
     {ok, Socket} = ssl:handshake(TLSTransportSocket, 5000),
     Id = case ssl:peercert(Socket) of
@@ -209,6 +173,11 @@ handle_incoming(TLSTransportSocket, {Module, Function}) ->
         {ok, Cert} ->
             extract_details(Cert)
         end,
+```
+
+we are running the socket in passive mode so we wait in receive for the socket to send up a message
+
+```erlang
     receive
         Msg ->
             {ssl, _, Gemini} = Msg,
@@ -218,12 +187,12 @@ handle_incoming(TLSTransportSocket, {Module, Function}) ->
                 "gemini" ->
                     Path = get_path(URI),
                     QueryKVs = get_query_KVs(URI),
-                    Frag = get_frag(URI),
+                    Frags = get_frag(URI),
                     Route = #{id       => Id,
                               path     => Path,
                               querykvs => QueryKVs,
-                              frag     => Frag},
-                    Responses = Module:Function(Route),
+                              frags    => Frags},
+                    Responses = M:F(Route),
 				    [ok = ssl:send(Socket, X) || X <- Responses],
 				    ok = ssl:close(Socket);
                 Other ->
@@ -234,12 +203,9 @@ handle_incoming(TLSTransportSocket, {Module, Function}) ->
 
 ```
 
-## Bits and pieces
+## Internal functions
 
-### Tidying up the request
-
-These functions are all called on the request that the user has sent it.
-They break up that request and make it easy to process
+These internal functions are all called by the handling function to process the URLs, extract keys and stuff
 
 ```erlang
 
@@ -253,21 +219,6 @@ get_frag(_)                -> "".
 
 parse_gemini(Path) ->
     _URI = uri_string:percent_decode(uri_string:parse(string:trim(Path))).
-
-```
-
-### Getting bits out of the cryptographic certificates
-
-The application server is only really interested in two things:
-
-* what the person has called themselves (their name)
-* what public key are they identifiable by
-^
-
-these functions just rummage around in the data that is sent setting up a secure
-communication and extract those bits.
-
-```erlang
 
 extract_details(Cert) ->
     {_, Data, _, _} = public_key:pkix_decode_cert(Cert, otp),
