@@ -122,8 +122,7 @@ start(Port, Certs, HandlerFn) ->
 %% internal functions
 
 %% ## The listening loop
-%% This is a very lightweight loop - when someone external contacts it is sets up a TLS connection and then passes it off immediately to another process to handle
-%% Each connection gets its own handling process, and spawning a process is cheap so this is safe up to 100,000s of connections
+%% This is a very lightweight loop - when someone external contacts it is sets up a TLS connection and then passes it off immediately to another process to handle. Each connection gets its own handling process, and spawning a process is cheap so this is safe up to 100,000s of connections
 listening_loop(ListenSSLSocket, HandlerFn) ->
     {ok, TLSTransportSocket} = ssl:transport_accept(ListenSSLSocket),
     _PID = spawn(belka, handle_incoming, [TLSTransportSocket, HandlerFn]),

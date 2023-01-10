@@ -154,8 +154,7 @@ now we pass off the listening socket to its own process
 internal functions
 
 ## The listening loop
-This is a very lightweight loop - when someone external contacts it is sets up a TLS connection and then passes it off immediately to another process to handle
-Each connection gets its own handling process, and spawning a process is cheap so this is safe up to 100,000s of connections
+This is a very lightweight loop - when someone external contacts it is sets up a TLS connection and then passes it off immediately to another process to handle. Each connection gets its own handling process, and spawning a process is cheap so this is safe up to 100,000s of connections
 
 ```erlang
 listening_loop(ListenSSLSocket, HandlerFn) ->
