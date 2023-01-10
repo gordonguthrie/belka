@@ -101,10 +101,14 @@ start(Port, Certs, HandlerFn) ->
             [{certs_keys, [Cs]}]
         end,
 
-    A = [{active, true}],
-    L = [{log_level, info}],
-    S = [{sni_fun, Fun2}],
-    V = [{verify, verify_peer}, {fail_if_no_peer_cert, false}, {verify_fun, {Fun1, []}}],
+    % these are all the options we start the ssl socket with
+
+    A = [{active,               true}],
+    L = [{log_level,            info}],
+    S = [{sni_fun,              Fun2}],
+    V = [{verify,               verify_peer},
+         {fail_if_no_peer_cert, false},
+         {verify_fun,           {Fun1, []}}],
 
     % we start a socket listening for a connection on the gemini:// port 1965
     %

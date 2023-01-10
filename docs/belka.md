@@ -121,10 +121,18 @@ We looking up the website the client is requesting and return their certificates
             [{certs_keys, [Cs]}]
         end,
 
-    A = [{active, true}],
-    L = [{log_level, info}],
-    S = [{sni_fun, Fun2}],
-    V = [{verify, verify_peer}, {fail_if_no_peer_cert, false}, {verify_fun, {Fun1, []}}],
+```
+
+these are all the options we start the ssl socket with
+
+```erlang
+
+    A = [{active,               true}],
+    L = [{log_level,            info}],
+    S = [{sni_fun,              Fun2}],
+    V = [{verify,               verify_peer},
+         {fail_if_no_peer_cert, false},
+         {verify_fun,           {Fun1, []}}],
 
 ```
 
