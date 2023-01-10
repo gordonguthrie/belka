@@ -1,5 +1,3 @@
--------------------------------------------------------------------
-
 ## Belka Gemini Server
 
 Belka is a [Gemini Server](https://gemini.circumlunar.space/)
@@ -8,6 +6,7 @@ Named after Belka - the second dog in space
 
 This is the sequence diagram for the server
 
+```
 +---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
 | YourApp |                      | Belkaserver |          | ListeningLoop |                 | HandleIncoming  |                    | GeminiClient  |
 +---------+                      +-------------+          +---------------+                 +-----------------+                    +---------------+
@@ -62,9 +61,7 @@ This is the sequence diagram for the server
      |                                  |                         |                                  |------------------------------------>|
      |                                  |                         |                                  |                                     |
 
-@end
-
--------------------------------------------------------------------
+```
 
 ```erlang
 
