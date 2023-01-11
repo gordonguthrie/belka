@@ -190,9 +190,11 @@ we are running the socket in passive mode so we wait in receive for the socket t
             case Scheme of
                 "gemini" ->
                     Path = get_path(URI),
+                    #{host := Host} = URI,
                     QueryKVs = get_query_KVs(URI),
                     Frags = get_frag(URI),
                     Route = #{id       => Id,
+                              host     => Host,
                               path     => Path,
                               querykvs => QueryKVs,
                               frags    => Frags},
